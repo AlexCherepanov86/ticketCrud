@@ -48,3 +48,12 @@
     display: block!important;
     overflow: hidden!important;
 }
+.number {
+    width: 50px!important;
+}
+.column-METROLocation > div {
+    background-color: #283593!important;
+}
+.numberfield {
+    width: 12%!important;
+}

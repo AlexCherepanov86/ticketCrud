@@ -5,11 +5,6 @@ import LabelIcon from '@material-ui/icons/Label';
 import { useMediaQuery, Theme } from '@material-ui/core';
 import { useTranslate, DashboardMenuItem, MenuItemLink } from 'react-admin';
 
-import visitors from '../visitors';
-import orders from '../orders';
-import invoices from '../invoices';
-import products from '../products';
-import categories from '../categories';
 import reviews from '../reviews';
 import SubMenu from './SubMenu';
 import { AppState } from '../types';
@@ -28,6 +23,7 @@ const Menu: FC<Props> = ({ onMenuClick, dense, logout }) => {
         menuSales: false,
         menuCustomers: false,
     });
+
     const translate = useTranslate();
     const isXSmall = useMediaQuery((theme: Theme) =>
         theme.breakpoints.down('xs')
@@ -148,6 +144,7 @@ const Menu: FC<Props> = ({ onMenuClick, dense, logout }) => {
             {/*    sidebarIsOpen={open}*/}
             {/*    dense={dense}*/}
             {/*/>*/}
+
             {isXSmall && (
                 <MenuItemLink
                     to="/configuration"

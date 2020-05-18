@@ -11,6 +11,7 @@ import {
     TextField,
     TextInput,
     AutocompleteArrayInput,
+    ChipField,
 } from 'react-admin';
 import {
     makeStyles,
@@ -20,6 +21,9 @@ import {
     Tab,
 } from '@material-ui/core';
 import { useQueryWithStore, Loading, Error } from 'react-admin';
+// this.setState((state) => {
+//     return { sidebarOpen: false};
+// });
 
 
 
@@ -81,6 +85,8 @@ const ListFilters = props => {
 
 const useDatagridStyles = makeStyles({
     total: { fontWeight: 'bold' },
+    rowEven: { background_color: '#666'},
+
 });
 
 const tabs = [
@@ -163,7 +169,7 @@ class TabbedDatagrid extends React.Component {
                                 {tabs.map(choice => (
                                     <Tab
                                         key={choice.id}
-                                        label={choice.name + "(" + choice.count + ")"}
+                                        label={choice.name + " " + "(" + choice.count + ")"}
                                         value={choice.id}
                                     />
                                 ))}
@@ -177,11 +183,11 @@ class TabbedDatagrid extends React.Component {
                                 optimized
                                 rowClick="edit"
                                 >
-                                <NumberField source="TicketNumber" label="Номер" />
+                                <NumberField source="TicketNumber" label="Номер" cellClassName="number" headerClassName="numberfield" style={{ backgroundcolor: '#000' }}/>
                                 <DateField source="Created" label="Создана" />
                                 <TextField source="Type" label="Тип" />
                                 <TextField source="Theme" label="Тема" />
-                                <TextField source="METROLocation" label="Местоположение" />
+                                <ChipField source="METROLocation" label="Местоположение" cellClassName="place"/>
                                 <TextField source="State" label="Состояние" />
                                 <TextField source="Priority" label="Приоритет" />
                                 <TextField source="Queue" label="Соисполнитель" />

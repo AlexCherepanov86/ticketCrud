@@ -6,14 +6,20 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson) => ({
   config: null,
 
   getOneFilter: (resource) =>
-    httpClient(`${apiUrl}/${resource}`).then(({ json }) => ({ data: json })),
+    httpClient(`${apiUrl}/${resource}`).then(({ json }) => {
+      // debugger
+      // TODO ТУТ проверь что данные пришли
+      return { data: json };
+    }),
 
-  getConfig: () => {
+  getConfig: (resource) => {
+    // debugger
+    // TODO Тут проверь что this !== undefined
     if (this.config) {
       return Promise.resolve(this.config);
     }
 
-    return this.getOneFilter().then(config => {
+    return this.getOneFilter(resource).then(config => {
       // debugger
       // TODO Тут смотришь чтобы тебе пришли данные с фильтрами
       return this.config = config;
@@ -32,7 +38,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson) => ({
     };
 
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const config = await this.getConfig();
+    const config = await this.getConfig(resource);
     const { headers, json } = await httpClient(url);
 
     // debugger

@@ -1,72 +1,99 @@
 import { stringify } from 'query-string';
 import { fetchUtils } from 'ra-core';
 
-/**
- * Maps react-admin queries to a json-server powered REST API
- *
- * @see https://github.com/typicode/json-server
- *
- * @example
- *
- * getList          => GET http://my.api.url/posts?_sort=title&_order=ASC&_start=0&_end=24
- * getOne           => GET http://my.api.url/posts/123
- * getManyReference => GET http://my.api.url/posts?author_id=345
- * getMany          => GET http://my.api.url/posts/123, GET http://my.api.url/posts/456, GET http://my.api.url/posts/789
- * create           => POST http://my.api.url/posts/123
- * update           => PUT http://my.api.url/posts/123
- * updateMany       => PUT http://my.api.url/posts/123, PUT http://my.api.url/posts/456, PUT http://my.api.url/posts/789
- * delete           => DELETE http://my.api.url/posts/123
- *
- * @example
- *
- * import React from 'react';
- * import { Admin, Resource } from 'react-admin';
- * import jsonServerProvider from 'ra-data-json-server';
- *
- * import { PostList } from './posts';
- *
- * const App = () => (
- *     <Admin dataProvider={jsonServerProvider('http://jsonplaceholder.typicode.com')}>
- *         <Resource name="posts" list={PostList} />
- *     </Admin>
- * );
- *
- * export default App;
- */
 export default (apiUrl, httpClient = fetchUtils.fetchJson) => ({
-    getList: (resource, params) => {
-        const { page, perPage } = params.pagination;
-        const { field, order } = params.sort;
-        const query = {
-            ...fetchUtils.flattenObject(params.filter),
-            _sort: field,
-            _order: order,
-            _start: (page - 1) * perPage,
-            _end: page * perPage,
-        };
 
-        const url = `${apiUrl}/${resource}?${stringify(query)}`;
+    getOneFilter: (resource) =>
+        httpClient(`${apiUrl}/${resource}`).then(({ json }) => ({
+            data: json,
+        })),
 
-        return httpClient(url).then(({ headers, json }) => {
-            if (!headers.has('x-total-count')) {
-                throw new Error(
-                    'The X-Total-Count header is missing in the HTTP Response. The jsonServer Data Provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare X-Total-Count in the Access-Control-Expose-Headers header?'
-                );
-            }
-            const { Tickets: data,  ...rest } = json
-            return {
-                ...rest,
-                data: data,
-                total: parseInt(
-                    headers
-                        .get('x-total-count')
-                        .split('/')
-                        .pop(),
-                    10
-                ),
-            };
-        });
-    },
+  config: null,
+
+  getConfig: () => {
+    if (this.config) {
+      return Promise.resolve(this.config);
+    }
+
+    return this.getOneFilter().then(config => {
+      return this.config = config;
+    })
+  },
+
+  getList: async (resource, params) => {
+    const {page, perPage} = params.pagination;
+    const {field, order} = params.sort;
+    const query = {
+      ...fetchUtils.flattenObject(params.filter),
+      _sort: field,
+      _order: order,
+      _start: (page - 1) * perPage,
+      _end: page * perPage,
+    };
+
+    const url = `${apiUrl}/${resource}?${stringify(query)}`;
+    const [config, { headers, json }] = await Promise.all([
+      this.getConfig(),
+      httpClient(url)
+    ]);
+
+    if (!headers.has('x-total-count')) {
+      throw new Error(
+        'The X-Total-Count header is missing in the HTTP Response. The jsonServer Data Provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare X-Total-Count in the Access-Control-Expose-Headers header?'
+      );
+    }
+    const {Tickets: data, ...rest} = json;
+
+    return {
+      ...rest,
+      data: data.map(record => {
+        record.METROLocationColor = config.METROLocationColor[record.METROLocation];
+        return record;
+      }),
+      total: parseInt(
+        headers
+          .get('x-total-count')
+          .split('/')
+          .pop(),
+        10
+      ),
+    };
+  },
+
+
+//     getList: (resource, params) => {
+//         const { page, perPage } = params.pagination;
+//         const { field, order } = params.sort;
+//         const query = {
+//             ...fetchUtils.flattenObject(params.filter),
+//             _sort: field,
+//             _order: order,
+//             _start: (page - 1) * perPage,
+//             _end: page * perPage,
+//         };
+//
+//         const url = `${apiUrl}/${resource}?${stringify(query)}`;
+//
+//         return httpClient(url).then(({ headers, json }) => {
+//             if (!headers.has('x-total-count')) {
+//                 throw new Error(
+//                     'The X-Total-Count header is missing in the HTTP Response. The jsonServer Data Provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare X-Total-Count in the Access-Control-Expose-Headers header?'
+//                 );
+//             }
+//             const { Tickets: data,  ...rest } = json
+//             return {
+//                 ...rest,
+//                 data: data,
+//                 total: parseInt(
+//                     headers
+//                         .get('x-total-count')
+//                         .split('/')
+//                         .pop(),
+//                     10
+//                 ),
+//             };
+//         });
+//     },
 
     getCounter: (resource) => {
             const query = {
@@ -98,11 +125,6 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson) => ({
 
     getOne: (resource, params) =>
         httpClient(`${apiUrl}/${resource}/${params.id}`).then(({ json }) => ({
-            data: json,
-        })),
-
-    getOneFilter: (resource) =>
-        httpClient(`${apiUrl}/${resource}`).then(({ json }) => ({
             data: json,
         })),
 

@@ -22,11 +22,6 @@ import {
     Tab,
 } from '@material-ui/core';
 import { useQueryWithStore, Loading, Error } from 'react-admin';
-// this.setState((state) => {
-//     return { sidebarOpen: false};
-// });
-
-
 
 const DateMultiInput = () => (
     <div>
@@ -38,9 +33,9 @@ const DateMultiInput = () => (
 
 const TimeMultiInput = () => (
     <div>
-        <NumberInput name="startUsedPercent" placeholder="Начало" label="%" max="100" helperText=" "/>
+        <NumberInput name="startUsedPercent" placeholder="Начало" label="%" max="100" min="0" helperText=" "/>
         &nbsp;
-        <NumberInput name="endUsedPercent" placeholder="Конец" label="%" max="100" helperText=" "/>
+        <NumberInput name="endUsedPercent" placeholder="Конец" label="%" max="100" min="0" helperText=" "/>
     </div>
 );
 
@@ -139,41 +134,11 @@ const TabWrapper = (props) => {
     );
 };
 
-// const MyDatagrid = props => {
-//     const { data, loading, error } = useQueryWithStore({
-//         type: 'getOneFilter',
-//         resource: 'Config',
-//     });
-//
-//     if (loading) return <Loading />;
-//     if (error) return <Error />;
-//     if (!data) return null;
-//
-//         <Datagrid
-//             {...props}
-//             ids={this.state[key.id]}
-//             optimized
-//             rowClick="edit"
-//         >
-//             <NumberField source="TicketNumber" label="Номер" cellClassName="number" headerClassName="numberfield" style={{ backgroundcolor: { data.StatesColors }}/>
-//             <DateField source="Created" label="Создана" />
-//             <TextField source="Type" label="Тип" />
-//             <TextField source="Theme" label="Тема" />
-//             <ChipField source="METROLocation" label="Местоположение" cellClassName="place" record="1"/>
-//             <TextField source="State" label="Состояние" />
-//             <TextField source="Priority" label="Приоритет" />
-//             <TextField source="Queue" label="Соисполнитель" />
-//             <TextField source="METROEquipmentType" label="Вид техники" />
-//             <TextField source="METROTOType" label="Вид ТО" />
-//             <TextField source="METROJobType" label="Способ работ" />
-//             <TextField source="Customer" label="Заявитель" />
-//             <TextField source="" label="Акт" />
-//         </Datagrid>
-// }
-
 class TabbedDatagrid extends React.Component {
 
-    state = { created: [], success: [] };
+
+
+    state = { created: [], success: []};
 
     static getDerivedStateFromProps(props, state) {
         const key = tabs.find(obj => obj.state.includes(props.filterValues.Tab));
@@ -194,7 +159,6 @@ class TabbedDatagrid extends React.Component {
 
         const { classes, filterValues, ...props } = this.props;
         const key = tabs.find(obj => obj.state.includes(filterValues.Tab));
-
 
         return (
             <Fragment>
@@ -226,11 +190,12 @@ class TabbedDatagrid extends React.Component {
                                 rowClick="edit"
                                 >
                                 {/*style={{ record={"М1-Отклонена"} ? color: '#661d0b' : color: '#000'}}*/}
+
                                 <NumberField source="TicketNumber" label="Номер" textAlign="center" cellClassName="number" headerClassName="numberfield" />
                                 <DateField source="Created" label="Создана" />
                                 <TextField source="Type" label="Тип" />
                                 <TextField source="Theme" label="Тема" />
-                                <ChipField source="METROLocation" label="Местоположение" cellClassName="place" />
+                                <ChipField source="METROLocation" label="Местоположение" />
                                 
                                 <TextField source="State" label="Состояние"  />
                                 <TextField source="Priority" label="Приоритет" />

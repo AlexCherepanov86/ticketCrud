@@ -3,7 +3,7 @@ import { fetchUtils } from 'ra-core';
 
 export default (apiUrl, httpClient = fetchUtils.fetchJson) => ({
 
-  config: null,
+  config: {},
 
   getOneFilter: (resource) =>
     httpClient(`${apiUrl}/${resource}`).then(({ json }) => {
@@ -15,14 +15,14 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson) => ({
   getConfig: (resource) => {
     // debugger
     // TODO Тут проверь что this !== undefined
-    if (this.config) {
-      return Promise.resolve(this.config);
+    if (this.config[resource]) {
+      return Promise.resolve(this.config[resource]);
     }
 
     return this.getOneFilter(resource).then(config => {
       // debugger
       // TODO Тут смотришь чтобы тебе пришли данные с фильтрами
-      return this.config = config;
+      return this.config[resource] = config;
     })
   },
 

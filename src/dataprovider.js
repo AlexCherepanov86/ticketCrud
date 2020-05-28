@@ -3,12 +3,10 @@ import { fetchUtils } from 'ra-core';
 
 export default (apiUrl, httpClient = fetchUtils.fetchJson) => ({
 
-    getOneFilter: (resource) =>
-        httpClient(`${apiUrl}/${resource}`).then(({ json }) => ({
-            data: json,
-        })),
-
   config: null,
+
+  getOneFilter: (resource) =>
+    httpClient(`${apiUrl}/${resource}`).then(({ json }) => ({ data: json })),
 
   getConfig: () => {
     if (this.config) {
@@ -16,13 +14,15 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson) => ({
     }
 
     return this.getOneFilter().then(config => {
+      // debugger
+      // TODO Тут смотришь чтобы тебе пришли данные с фильтрами
       return this.config = config;
     })
   },
 
   getList: async (resource, params) => {
-    const {page, perPage} = params.pagination;
-    const {field, order} = params.sort;
+    const { page, perPage } = params.pagination;
+    const { field, order } = params.sort;
     const query = {
       ...fetchUtils.flattenObject(params.filter),
       _sort: field,
@@ -32,21 +32,31 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson) => ({
     };
 
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const [config, { headers, json }] = await Promise.all([
-      this.getConfig(),
-      httpClient(url)
-    ]);
+    const config = await this.getConfig();
+    const { headers, json } = await httpClient(url);
+
+    // debugger
+    // TODO Тут смотришь чтобы:
+    // - в config были нужные данные
+    // - в json пришел ответ с сервера
 
     if (!headers.has('x-total-count')) {
       throw new Error(
         'The X-Total-Count header is missing in the HTTP Response. The jsonServer Data Provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare X-Total-Count in the Access-Control-Expose-Headers header?'
       );
     }
-    const {Tickets: data, ...rest} = json;
+    const { Tickets: data, ...rest} = json;
 
     return {
       ...rest,
       data: data.map(record => {
+        // debugger
+        // TODO Тут смотришь что:
+        // - в объекте record действительно есть ключ 'METROLocation' который содержит название станции метро,
+        //   если нет вставляешь правильный ключ вмиесто record.METROLocation
+        // - в объекте config действительно есть ключ 'METROLocationColor' который содержит станции метро: цвет,
+        //   если нет вставляешь правильный ключ вместо config.METROLocationColor
+
         record.METROLocationColor = config.METROLocationColor[record.METROLocation];
         return record;
       }),

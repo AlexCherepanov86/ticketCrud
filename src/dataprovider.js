@@ -1,10 +1,9 @@
 import { stringify } from 'query-string';
 import { fetchUtils } from 'ra-core';
 
+const configCache = {};
+
 export default (apiUrl, httpClient = fetchUtils.fetchJson) => ({
-
-  config: {},
-
   getOneFilter: (resource) =>
     httpClient(`${apiUrl}/${resource}`).then(({ json }) => {
       // debugger
@@ -15,14 +14,14 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson) => ({
   getConfig: (resource) => {
     // debugger
     // TODO Тут проверь что this !== undefined
-    if (this.config[resource]) {
-      return Promise.resolve(this.config[resource]);
+    if (configCache[resource]) {
+      return Promise.resolve(configCache[resource]);
     }
 
     return this.getOneFilter(resource).then(config => {
       // debugger
       // TODO Тут смотришь чтобы тебе пришли данные с фильтрами
-      return this.config[resource] = config;
+      return configCache[resource] = config;
     })
   },
 

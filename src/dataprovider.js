@@ -7,20 +7,22 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson) => ({
   getOneFilter: (resource) =>
     httpClient(`${apiUrl}/${resource}`).then(({ json }) => {
       // debugger
-      // TODO ТУТ проверь что данные пришли
+      // TODO 2. ТУТ проверь что данные пришли
       return { data: json };
     }),
 
   getConfig: (resource) => {
     // debugger
-    // TODO Тут проверь что this !== undefined
+    // TODO 1. При первом вызове configCache[resource] === undefined
+    // TODO При втором вызове configCache[resource] === данные с сервера
     if (configCache[resource]) {
       return Promise.resolve(configCache[resource]);
     }
 
     return this.getOneFilter(resource).then(config => {
       // debugger
-      // TODO Тут смотришь чтобы тебе пришли данные с фильтрами
+      // TODO 3. Тут смотришь чтобы тебе пришли данные с фильтрами
+      // TODO Сюда должны попасть только один раз
       return configCache[resource] = config;
     })
   },

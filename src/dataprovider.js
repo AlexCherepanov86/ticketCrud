@@ -3,29 +3,32 @@ import { fetchUtils } from 'ra-core';
 
 const configCache = {};
 
-export default (apiUrl, httpClient = fetchUtils.fetchJson) => ({
-  getOneFilter: (resource) =>
-    httpClient(`${apiUrl}/${resource}`).then(({ json }) => {
-      // debugger
-      // TODO 2. ТУТ проверь что данные пришли
-      return { data: json };
-    }),
-
-  getConfig: (resource) => {
+function getOneFilter(httpClient, apiUrl, resource) {
+  return httpClient(`${apiUrl}/${resource}`).then(({ json }) => {
     // debugger
-    // TODO 1. При первом вызове configCache[resource] === undefined
-    // TODO При втором вызове configCache[resource] === данные с сервера
-    if (configCache[resource]) {
-      return Promise.resolve(configCache[resource]);
-    }
+    // TODO 2. ТУТ проверь что данные пришли
+    return { data: json };
+  });
+}
 
-    return this.getOneFilter(resource).then(config => {
-      // debugger
-      // TODO 3. Тут смотришь чтобы тебе пришли данные с фильтрами
-      // TODO Сюда должны попасть только один раз
-      return configCache[resource] = config;
-    })
-  },
+function getConfig(httpClient, apiUrl, resource) {
+  // debugger
+  // TODO 1. При первом вызове configCache[resource] === undefined
+  // TODO При втором вызове configCache[resource] === данные с сервера
+  if (configCache[resource]) {
+    return Promise.resolve(configCache[resource]);
+  }
+
+  return getOneFilter(httpClient, apiUrl, resource).then(config => {
+    // debugger
+    // TODO 3. Тут смотришь чтобы тебе пришли данные с фильтрами
+    // TODO Сюда должны попасть только один раз
+    return configCache[resource] = config;
+  })
+}
+
+export default (apiUrl, httpClient = fetchUtils.fetchJson) => ({
+  getOneFilter: (resource) => getOneFilter(httpClient, apiUrl, resource),
 
   getList: async (resource, params) => {
     const { page, perPage } = params.pagination;
@@ -39,7 +42,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson) => ({
     };
 
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const config = await this.getConfig(resource);
+    const config = await getConfig(httpClient, apiUrl, resource);
     const { headers, json } = await httpClient(url);
 
     // debugger
